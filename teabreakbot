@@ -32,6 +32,21 @@ class TeabreakBot(irc.IRCClient):
 	auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
 	self.api = tweepy.API(auth)
 
+    def __human_time_diff(self, seconds):
+	""" Convert seconds into human readable time periods """
+	if seconds < 0:
+		seconds = 0
+	timediffstr = ""
+	if seconds > 3600:
+		timediffstr += str(seconds/3600)+" hour(s) "
+		seconds -= (seconds/3600)*3600
+	if seconds > 60:
+		timediffstr += str(seconds/60)+" minute(s) "
+		seconds -= (seconds/60)*60
+	if seconds > 0 or timediffstr == "":
+		timediffstr += str(seconds)+" second(s)"
+	return timediffstr.strip()
+
     def ping_pong(self):
     	self.sendLine("PING :Ph33r!")
 	reactor.callLater(30,self.ping_pong)
@@ -93,17 +108,7 @@ class TeabreakBot(irc.IRCClient):
 		if "when" in splitmsg.lower() and "last" in splitmsg.lower():
 			if self.lastteabreak > 0:
 				currenttime = int(time.time())
-				timediff    = currenttime - self.lastteabreak
-				if timediff > 3600:
-					timediffstr = str(timediff/3600)+" hour(s)"
-					timediff -= (timediff/3600)*3600
-					if timediff > 0:
-						timediffstr += " "+str(timediff/60)+ " minute(s)"
-				elif timediff > 60:
-					timediffstr = str(timediff/60)+" minute(s)"
-					timediff -= timediff/60
-				else:
-					timediffstr = str(timediff)+" second(s)"
+				timediffstr = self.__human_time_diff(currenttime - self.lastbreaktime)
 				self.say(channel, "The last teabreak was "+timediffstr+" ago at "+datetime.datetime.fromtimestamp(self.lastteabreak).strftime('%H:%M'))
 		elif "break" in splitmsg.lower():
 			if user in self.ops:

@@ -12,7 +12,8 @@ class TeabreakBot(irc.IRCClient):
     def __init__(self):
         self.nickname = "teabreakbot"
 	self.username = "Teabreaks"
-	self.lastteabreak = 0;
+	self.lastbreaktime = 0;
+	self.lastbreaktype = "";
 
 	try:
 	    file = open('ops','r')
@@ -106,28 +107,33 @@ class TeabreakBot(irc.IRCClient):
 	if namementioned:
 		splitmsg = splitmsg.strip()
 		if "when" in splitmsg.lower() and "last" in splitmsg.lower():
-			if self.lastteabreak > 0:
+			if self.lastbreaktime > 0:
 				currenttime = int(time.time())
 				timediffstr = self.__human_time_diff(currenttime - self.lastbreaktime)
-				self.say(channel, "The last teabreak was "+timediffstr+" ago at "+datetime.datetime.fromtimestamp(self.lastteabreak).strftime('%H:%M'))
+				self.say(channel, "The last break was a "+self.lastbreaktype+", it happened "+timediffstr+" ago at "+datetime.datetime.fromtimestamp(self.lastbreaktime).strftime('%H:%M'))
 		elif "break" in splitmsg.lower():
+			if "lunch" in splitmsg.lower():
+				breaktype = "Lunchbreak"
+			else:
+				breaktype = "Teabreak"
 			if user in self.ops:
-				print "** TEABREAK DETECTED **",user,"has called a teabreak"
-				nowteabreak = int(time.time())
-				if (nowteabreak - self.lastteabreak) >= 600:
-					self.lastteabreak = nowteabreak
+				print "** "+breaktype.upper()+" DETECTED **",user,"has called a "+breaktype
+				nowbreak = int(time.time())
+				if (nowbreak - self.lastbreaktime) >= 600:
+					self.lastbreaktime = nowbreak
+					self.lastbreaktype = breaktype
 					if "testbreak" not in splitmsg.lower():
 						self.api.update_status(user2+" has called a teabreak - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")")
 						#self.msg("samo83", "Oi it's teabreak time")
 						#self.msg("samo83_", "Oi it's teabreak time")
 						#self.msg("samo83__", "Oi it's teabreak time")
-						self.say(channel, "Enjoy your teabreak!")
+						self.say(channel, "Enjoy your "+breaktype+"!")
 				else:
-					print "** TEABREAK DENIED ** Please wait another",(600 - (nowteabreak - self.lastteabreak)),"seconds before calling a teabreak"
-					self.say(channel, "Teabreak denied! Please wait another "+str(600 - (nowteabreak - self.lastteabreak))+" seconds before calling a teabreak")
+					print "** "+breaktype.upper()+" DENIED ** Please wait another "+self.__human_time_diff(600 - (nowbreak - self.lastbreaktime))+" before calling a break"
+					self.say(channel, breaktype+" denied! Please wait another "+self.__human_time_diff(600 - (nowbreak - self.lastbreaktime))+" before calling a break")
 			else:
-				print "** UNAUTHORISED USER",user,"ATTEMPTED TO CALL A TEABREAK **"
-				self.say(channel, "Teabreak denied! You need ops to call a teabreak")
+				print "** UNAUTHORISED USER",user,"ATTEMPTED TO CALL A "+breaktype.upper()+" **"
+				self.say(channel, breaktype+" denied! You need ops to call a break")
 
         if channel[0] in ['#','&']:
 	    if msg.startswith("!") and user in self.ops:

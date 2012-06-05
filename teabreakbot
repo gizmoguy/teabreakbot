@@ -3,13 +3,7 @@
 from twisted.words.protocols import irc
 from twisted.internet import reactor, protocol
 
-# system imports
-import time, sys
-import os
-import xmlrpclib
-import fnmatch
-import random
-import tweepy
+import sys, os, re
 import datetime
 import time
 

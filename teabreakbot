@@ -6,6 +6,21 @@ from twisted.internet import reactor, protocol
 import sys, os, re
 import datetime
 import time
+import ConfigParser
+
+def read_config():
+	filename = os.path.join(os.path.dirname(sys.argv[0]),'settings.cfg')
+	if not os.path.exists(filename):
+		return
+	config=ConfigParser.RawConfigParser()
+	config.add_section("twitter")
+	config.set("twitter","enabled",False)
+	config.set("twitter","consumer_key","")
+	config.set("twitter","consumer_secret","")
+	config.set("twitter","access_key","")
+	config.set("twitter","access_secret","")
+	config.read(filename)
+	return config
 
 class TeabreakBot(irc.IRCClient):
     
@@ -15,6 +30,7 @@ class TeabreakBot(irc.IRCClient):
 	self.lastbreaktime = 0;
 	self.lastbreaktype = "";
 	self.message = re.compile('^'+self.nickname+'[:,] ?(.*)')
+	self.config = read_config()
 
 	try:
 	    file = open('ops','r')
@@ -24,15 +40,17 @@ class TeabreakBot(irc.IRCClient):
 	    self.ops = []
 	reactor.callLater(30,self.ping_pong)
 
-	""" Setup twitter API """
-	CONSUMER_KEY = ''
-	CONSUMER_SECRET = ''
-	ACCESS_KEY = ''
-	ACCESS_SECRET = ''
+	if self.config != None and self.config.getboolean('twitter','enabled'):
+		import tweepy
+		""" Setup twitter API """
+		CONSUMER_KEY = self.config.get('twitter','consumer_key')
+		CONSUMER_SECRET = self.config.get('twitter','consumer_secret')
+		ACCESS_KEY = self.config.get('twitter','access_key')
+		ACCESS_SECRET = self.config.get('twitter','access_secret')
 
-	auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-	auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
-	self.api = tweepy.API(auth)
+		auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+		auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
+		self.api = tweepy.API(auth)
 
     def __human_time_diff(self, seconds):
 	""" Convert seconds into human readable time periods """
@@ -115,7 +133,9 @@ class TeabreakBot(irc.IRCClient):
 					self.lastbreaktime = nowbreak
 					self.lastbreaktype = breaktype
 					if "testbreak" not in splitmsg.lower():
-						self.api.update_status(user2+" has called a teabreak - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")")
+						if self.config.getboolean('twitter','enabled'):
+							print "** TWEETING ** "+user2+" has called a "+breaktype+" - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")"
+							self.api.update_status(user2+" has called a "+breaktype+" - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")")
 						#self.msg("samo83", "Oi it's teabreak time")
 						#self.msg("samo83_", "Oi it's teabreak time")
 						#self.msg("samo83__", "Oi it's teabreak time")

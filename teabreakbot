@@ -1,0 +1,196 @@
+#!/usr/local/bin/python
+# twisted imports
+from twisted.words.protocols import irc
+from twisted.internet import reactor, protocol
+
+# system imports
+import time, sys
+import os
+import xmlrpclib
+import fnmatch
+import random
+import tweepy
+import datetime
+import time
+
+class TeabreakBot(irc.IRCClient):
+    
+    def __init__(self):
+        self.nickname = "teabreakbot"
+	self.username = "Teabreaks"
+	self.lastteabreak = 0;
+
+	try:
+	    file = open('ops','r')
+	    self.ops = file.read().strip('\n').split('\n')
+	    file.close()
+	except:
+	    self.ops = []
+	reactor.callLater(30,self.ping_pong)
+
+	""" Setup twitter API """
+	CONSUMER_KEY = ''
+	CONSUMER_SECRET = ''
+	ACCESS_KEY = ''
+	ACCESS_SECRET = ''
+
+	auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+	auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
+	self.api = tweepy.API(auth)
+
+    def ping_pong(self):
+    	self.sendLine("PING :Ph33r!")
+	reactor.callLater(30,self.ping_pong)
+
+    def connectionMade(self):
+        irc.IRCClient.connectionMade(self)
+
+    def connectionLost(self, reason):
+        irc.IRCClient.connectionLost(self, reason)
+
+    # callbacks for events
+
+    def signedOn(self):
+        """Called when bot has succesfully signed on to server."""
+	self.join("#teabreak")
+
+    def irc_unknown(self, prefix, command, params):
+    	if command=="PONG":
+		return
+    	print prefix,command,params
+ 
+    def notice(self, user, channel, msg):
+    	print user,"NOTICE",channel,msg
+
+    def cmd_help(self,user,channel,args):
+	self.say(channel," ".join([x[4:]
+			for x in dir(self.__class__) 
+			if x.startswith("cmd_")]))
+
+    def cmd_op(self,user,channel,args):
+	self.mode(channel,"+","o",user=user)
+
+    def do_command(self,user,channel,cmd):
+    	cmd,args=(cmd+" ").split(" ",1)
+	cmd="cmd_"+cmd.lower()
+	if cmd in dir(self.__class__):
+		getattr(self.__class__,cmd)(self,user,channel,args)
+
+    def privmsg(self, user, channel, msg):
+        """This will get called when the bot receives a message."""
+	print user,"PRIVMSG",channel,msg
+
+        user = user.split('!', 1)[0]
+	user2 = user.split('^moose', 1)[0]
+
+	namementioned = False
+
+	""" Look for teabreak in message """
+	if self.nickname.lower()+":" in msg.lower():
+		namementioned = True
+		splitmsg = msg.split(self.nickname+":", 1)[1]
+	
+	if self.nickname.lower()+"," in msg.lower():
+		namementioned = True
+		splitmsg = msg.split(self.nickname+",", 1)[1]
+
+	if namementioned:
+		splitmsg = splitmsg.strip()
+		if "when" in splitmsg.lower() and "last" in splitmsg.lower():
+			if self.lastteabreak > 0:
+				currenttime = int(time.time())
+				timediff    = currenttime - self.lastteabreak
+				if timediff > 3600:
+					timediffstr = str(timediff/3600)+" hour(s)"
+					timediff -= (timediff/3600)*3600
+					if timediff > 0:
+						timediffstr += " "+str(timediff/60)+ " minute(s)"
+				elif timediff > 60:
+					timediffstr = str(timediff/60)+" minute(s)"
+					timediff -= timediff/60
+				else:
+					timediffstr = str(timediff)+" second(s)"
+				self.say(channel, "The last teabreak was "+timediffstr+" ago at "+datetime.datetime.fromtimestamp(self.lastteabreak).strftime('%H:%M'))
+		elif "break" in splitmsg.lower():
+			if user in self.ops:
+				print "** TEABREAK DETECTED **",user,"has called a teabreak"
+				nowteabreak = int(time.time())
+				if (nowteabreak - self.lastteabreak) >= 600:
+					self.lastteabreak = nowteabreak
+					if "testbreak" not in splitmsg.lower():
+						self.api.update_status(user2+" has called a teabreak - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")")
+						#self.msg("samo83", "Oi it's teabreak time")
+						#self.msg("samo83_", "Oi it's teabreak time")
+						#self.msg("samo83__", "Oi it's teabreak time")
+						self.say(channel, "Enjoy your teabreak!")
+				else:
+					print "** TEABREAK DENIED ** Please wait another",(600 - (nowteabreak - self.lastteabreak)),"seconds before calling a teabreak"
+					self.say(channel, "Teabreak denied! Please wait another "+str(600 - (nowteabreak - self.lastteabreak))+" seconds before calling a teabreak")
+			else:
+				print "** UNAUTHORISED USER",user,"ATTEMPTED TO CALL A TEABREAK **"
+				self.say(channel, "Teabreak denied! You need ops to call a teabreak")
+
+        if channel[0] in ['#','&']:
+	    if msg.startswith("!") and user in self.ops:
+		    self.do_command(user,channel,msg[1:].strip())
+    
+    def userJoined(self, user, channel):
+	print user,"JOINED",channel
+    	if user in self.ops:
+	    self.cmd_op(user, channel, None)
+
+    def cmd_useradd(self,user,channel,args):
+    	args = args.strip(' ')
+    	if user in self.ops and args not in self.ops:
+	    self.ops.append(args)
+	    self.save_users()
+	    self.say(channel, "Added %s" % args)
+    
+    def cmd_userdel(self,user,channel,args):
+    	args = args.strip(' ')
+    	if user in self.ops and args in self.ops:
+	    self.ops.remove(args)
+	    self.save_users()
+	    self.say(channel, "Removed %s" % args)
+
+    def cmd_userlist(self,user,channel,args):
+    	args = args.strip()
+	if user in self.ops:
+		self.say(channel,"Users: "+" ".join(self.ops))
+	else:
+		self.say(channel,"Permission denied")
+
+    def save_users(self):
+	try:
+    	    file = open('ops','w')
+    	    for user in self.ops:
+                file.write(user + '\n')
+	    file.close()
+	except:
+	    pass
+
+
+class TeabreakBotFactory(protocol.ClientFactory):
+    # the class of the protocol to build when new connection is made
+    protocol = TeabreakBot
+
+    def clientConnectionLost(self, connector, reason):
+        """If we get disconnected, reconnect to server."""
+	time.sleep(30)
+        connector.connect()
+
+    def clientConnectionFailed(self, connector, reason):
+        print "connection failed:", reason
+	time.sleep(30)
+        connector.connect()
+
+
+if __name__ == '__main__':
+    # create factory protocol and application
+    f = TeabreakBotFactory()
+
+    # connect factory to this host and port
+    reactor.connectTCP("localhost", 6667, f)
+
+    # run bot
+    reactor.run()

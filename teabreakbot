@@ -9,74 +9,74 @@ import time
 import ConfigParser
 
 def read_config():
-	filenames = ['/etc/teabreakbot.cfg',
-			os.path.expanduser('~/.teabreakbot.cfg'),
-			'settings.cfg']
+    filenames = ['/etc/teabreakbot.cfg',
+            os.path.expanduser('~/.teabreakbot.cfg'),
+            'settings.cfg']
 
-	config=ConfigParser.RawConfigParser()
+    config=ConfigParser.RawConfigParser()
 
-	config.add_section("irc")
-	config.set("irc","host","localhost")
-	config.set("irc","port","6667")
+    config.add_section("irc")
+    config.set("irc","host","localhost")
+    config.set("irc","port","6667")
 
-	config.add_section("twitter")
-	config.set("twitter","enabled","false")
-	config.set("twitter","consumer_key","")
-	config.set("twitter","consumer_secret","")
-	config.set("twitter","access_key","")
-	config.set("twitter","access_secret","")
+    config.add_section("twitter")
+    config.set("twitter","enabled","false")
+    config.set("twitter","consumer_key","")
+    config.set("twitter","consumer_secret","")
+    config.set("twitter","access_key","")
+    config.set("twitter","access_secret","")
 
-	config.read(filenames)
-	return config
+    config.read(filenames)
+    return config
 
 class TeabreakBot(irc.IRCClient):
     
     def __init__(self):
         self.nickname = "teabreakbot"
-	self.username = "Teabreaks"
-	self.lastbreaktime = 0;
-	self.lastbreaktype = "";
-	self.message = re.compile('^'+self.nickname+'[:,] ?(.*)')
-	self.config = read_config()
+        self.username = "Teabreaks"
+        self.lastbreaktime = 0;
+        self.lastbreaktype = "";
+        self.message = re.compile('^'+self.nickname+'[:,] ?(.*)')
+        self.config = read_config()
 
-	try:
-	    file = open('ops','r')
-	    self.ops = file.read().strip('\n').split('\n')
-	    file.close()
-	except:
-	    self.ops = []
-	reactor.callLater(30,self.ping_pong)
+        try:
+            file = open('ops','r')
+            self.ops = file.read().strip('\n').split('\n')
+            file.close()
+        except:
+            self.ops = []
+        reactor.callLater(30,self.ping_pong)
 
-	if self.config != None and self.config.getboolean('twitter','enabled'):
-		import tweepy
-		""" Setup twitter API """
-		CONSUMER_KEY = self.config.get('twitter','consumer_key')
-		CONSUMER_SECRET = self.config.get('twitter','consumer_secret')
-		ACCESS_KEY = self.config.get('twitter','access_key')
-		ACCESS_SECRET = self.config.get('twitter','access_secret')
+        if self.config != None and self.config.getboolean('twitter','enabled'):
+            import tweepy
+            """ Setup twitter API """
+            CONSUMER_KEY = self.config.get('twitter','consumer_key')
+            CONSUMER_SECRET = self.config.get('twitter','consumer_secret')
+            ACCESS_KEY = self.config.get('twitter','access_key')
+            ACCESS_SECRET = self.config.get('twitter','access_secret')
 
-		auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-		auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
-		self.api = tweepy.API(auth)
+            auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+            auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
+            self.api = tweepy.API(auth)
 
     def __human_time_diff(self, seconds):
-	""" Convert seconds into human readable time periods """
-	if seconds < 0:
-		seconds = 0
-	timediffstr = ""
-	if seconds > 3600:
-		timediffstr += str(seconds/3600)+" hour(s) "
-		seconds -= (seconds/3600)*3600
-	if seconds > 60:
-		timediffstr += str(seconds/60)+" minute(s) "
-		seconds -= (seconds/60)*60
-	if seconds > 0 or timediffstr == "":
-		timediffstr += str(seconds)+" second(s)"
-	return timediffstr.strip()
+        """ Convert seconds into human readable time periods """
+        if seconds < 0:
+            seconds = 0
+        timediffstr = ""
+        if seconds > 3600:
+            timediffstr += str(seconds/3600)+" hour(s) "
+            seconds -= (seconds/3600)*3600
+        if seconds > 60:
+            timediffstr += str(seconds/60)+" minute(s) "
+            seconds -= (seconds/60)*60
+        if seconds > 0 or timediffstr == "":
+            timediffstr += str(seconds)+" second(s)"
+        return timediffstr.strip()
 
     def ping_pong(self):
-    	self.sendLine("PING :Ph33r!")
-	reactor.callLater(30,self.ping_pong)
+        self.sendLine("PING :Ph33r!")
+        reactor.callLater(30,self.ping_pong)
 
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
@@ -88,110 +88,110 @@ class TeabreakBot(irc.IRCClient):
 
     def signedOn(self):
         """Called when bot has succesfully signed on to server."""
-	self.join("#teabreak")
+        self.join("#teabreak")
 
     def irc_unknown(self, prefix, command, params):
-    	if command=="PONG":
-		return
-    	print prefix,command,params
+        if command=="PONG":
+            return
+        print prefix,command,params
  
     def notice(self, user, channel, msg):
-    	print user,"NOTICE",channel,msg
+        print user,"NOTICE",channel,msg
 
     def cmd_help(self,user,channel,args):
-	self.say(channel," ".join([x[4:]
-			for x in dir(self.__class__) 
-			if x.startswith("cmd_")]))
+        self.say(channel," ".join([x[4:]
+                for x in dir(self.__class__)
+                if x.startswith("cmd_")]))
 
     def cmd_op(self,user,channel,args):
-	self.mode(channel,"+","o",user=user)
+        self.mode(channel,"+","o",user=user)
 
     def do_command(self,user,channel,cmd):
-    	cmd,args=(cmd+" ").split(" ",1)
-	cmd="cmd_"+cmd.lower()
-	if cmd in dir(self.__class__):
-		getattr(self.__class__,cmd)(self,user,channel,args)
+        cmd,args=(cmd+" ").split(" ",1)
+        cmd="cmd_"+cmd.lower()
+        if cmd in dir(self.__class__):
+            getattr(self.__class__,cmd)(self,user,channel,args)
 
     def privmsg(self, user, channel, msg):
         """This will get called when the bot receives a message."""
-	print user,"PRIVMSG",channel,msg
+        print user,"PRIVMSG",channel,msg
 
         user = user.split('!', 1)[0]
-	user2 = user.split('^moose', 1)[0]
+        user2 = user.split('^moose', 1)[0]
 
-	# is the message at us?
-	splitmsg = self.message.match(msg.lower())
-	if splitmsg:
-		splitmsg = splitmsg.group(1).strip()
-		if "when" in splitmsg.lower() and "last" in splitmsg.lower():
-			if self.lastbreaktime > 0:
-				currenttime = int(time.time())
-				timediffstr = self.__human_time_diff(currenttime - self.lastbreaktime)
-				self.say(channel, "The last break was a "+self.lastbreaktype+", it happened "+timediffstr+" ago at "+datetime.datetime.fromtimestamp(self.lastbreaktime).strftime('%H:%M'))
-		elif "break" in splitmsg.lower():
-			if "lunch" in splitmsg.lower():
-				breaktype = "lunchbreak"
-			else:
-				breaktype = "teabreak"
-			if user in self.ops:
-				print "** "+breaktype.upper()+" DETECTED **",user,"has called a "+breaktype
-				nowbreak = int(time.time())
-				if (nowbreak - self.lastbreaktime) >= 600:
-					self.lastbreaktime = nowbreak
-					self.lastbreaktype = breaktype
-					if "testbreak" not in splitmsg.lower():
-						if self.config.getboolean('twitter','enabled'):
-							print "** TWEETING ** "+user2+" has called a "+breaktype+" - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")"
-							self.api.update_status(user2+" has called a "+breaktype+" - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")")
-						#self.msg("samo83", "Oi it's teabreak time")
-						#self.msg("samo83_", "Oi it's teabreak time")
-						#self.msg("samo83__", "Oi it's teabreak time")
-						self.say(channel, "Enjoy your "+breaktype+"!")
-				else:
-					print "** "+breaktype.upper()+" DENIED ** Please wait another "+self.__human_time_diff(600 - (nowbreak - self.lastbreaktime))+" before calling a break"
-					self.say(channel, breaktype+" denied! Please wait another "+self.__human_time_diff(600 - (nowbreak - self.lastbreaktime))+" before calling a break")
-			else:
-				print "** UNAUTHORISED USER",user,"ATTEMPTED TO CALL A "+breaktype.upper()+" **"
-				self.say(channel, breaktype+" denied! You need ops to call a break")
+        # is the message at us?
+        splitmsg = self.message.match(msg.lower())
+        if splitmsg:
+            splitmsg = splitmsg.group(1).strip()
+            if "when" in splitmsg.lower() and "last" in splitmsg.lower():
+                if self.lastbreaktime > 0:
+                    currenttime = int(time.time())
+                    timediffstr = self.__human_time_diff(currenttime - self.lastbreaktime)
+                    self.say(channel, "The last break was a "+self.lastbreaktype+", it happened "+timediffstr+" ago at "+datetime.datetime.fromtimestamp(self.lastbreaktime).strftime('%H:%M'))
+            elif "break" in splitmsg.lower():
+                if "lunch" in splitmsg.lower():
+                    breaktype = "lunchbreak"
+                else:
+                    breaktype = "teabreak"
+                if user in self.ops:
+                    print "** "+breaktype.upper()+" DETECTED **",user,"has called a "+breaktype
+                    nowbreak = int(time.time())
+                    if (nowbreak - self.lastbreaktime) >= 600:
+                        self.lastbreaktime = nowbreak
+                        self.lastbreaktype = breaktype
+                        if "testbreak" not in splitmsg.lower():
+                            if self.config.getboolean('twitter','enabled'):
+                                print "** TWEETING ** "+user2+" has called a "+breaktype+" - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")"
+                                self.api.update_status(user2+" has called a "+breaktype+" - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")")
+                            #self.msg("samo83", "Oi it's teabreak time")
+                            #self.msg("samo83_", "Oi it's teabreak time")
+                            #self.msg("samo83__", "Oi it's teabreak time")
+                            self.say(channel, "Enjoy your "+breaktype+"!")
+                    else:
+                        print "** "+breaktype.upper()+" DENIED ** Please wait another "+self.__human_time_diff(600 - (nowbreak - self.lastbreaktime))+" before calling a break"
+                        self.say(channel, breaktype+" denied! Please wait another "+self.__human_time_diff(600 - (nowbreak - self.lastbreaktime))+" before calling a break")
+                else:
+                    print "** UNAUTHORISED USER",user,"ATTEMPTED TO CALL A "+breaktype.upper()+" **"
+                    self.say(channel, breaktype+" denied! You need ops to call a break")
 
         if channel[0] in ['#','&']:
-	    if msg.startswith("!") and user in self.ops:
-		    self.do_command(user,channel,msg[1:].strip())
-    
+            if msg.startswith("!") and user in self.ops:
+                self.do_command(user,channel,msg[1:].strip())
+
     def userJoined(self, user, channel):
-	print user,"JOINED",channel
-    	if user in self.ops:
-	    self.cmd_op(user, channel, None)
+        print user,"JOINED",channel
+        if user in self.ops:
+            self.cmd_op(user, channel, None)
 
     def cmd_useradd(self,user,channel,args):
-    	args = args.strip(' ')
-    	if user in self.ops and args not in self.ops:
-	    self.ops.append(args)
-	    self.save_users()
-	    self.say(channel, "Added %s" % args)
+        args = args.strip(' ')
+        if user in self.ops and args not in self.ops:
+            self.ops.append(args)
+            self.save_users()
+            self.say(channel, "Added %s" % args)
     
     def cmd_userdel(self,user,channel,args):
-    	args = args.strip(' ')
-    	if user in self.ops and args in self.ops:
-	    self.ops.remove(args)
-	    self.save_users()
-	    self.say(channel, "Removed %s" % args)
+        args = args.strip(' ')
+        if user in self.ops and args in self.ops:
+            self.ops.remove(args)
+            self.save_users()
+            self.say(channel, "Removed %s" % args)
 
     def cmd_userlist(self,user,channel,args):
-    	args = args.strip()
-	if user in self.ops:
-		self.say(channel,"Users: "+" ".join(self.ops))
-	else:
-		self.say(channel,"Permission denied")
+        args = args.strip()
+        if user in self.ops:
+            self.say(channel,"Users: "+" ".join(self.ops))
+        else:
+            self.say(channel,"Permission denied")
 
     def save_users(self):
-	try:
-    	    file = open('ops','w')
-    	    for user in self.ops:
+        try:
+            file = open('ops','w')
+            for user in self.ops:
                 file.write(user + '\n')
-	    file.close()
-	except:
-	    pass
+            file.close()
+        except:
+            pass
 
 
 class TeabreakBotFactory(protocol.ClientFactory):
@@ -200,12 +200,12 @@ class TeabreakBotFactory(protocol.ClientFactory):
 
     def clientConnectionLost(self, connector, reason):
         """If we get disconnected, reconnect to server."""
-	time.sleep(30)
+        time.sleep(30)
         connector.connect()
 
     def clientConnectionFailed(self, connector, reason):
         print "connection failed:", reason
-	time.sleep(30)
+        time.sleep(30)
         connector.connect()
 
 
@@ -221,3 +221,5 @@ if __name__ == '__main__':
 
     # run bot
     reactor.run()
+
+# vim: set smartindent shiftwidth=4 tabstop=4 softtabstop=4 expandtab :

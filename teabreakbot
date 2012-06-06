@@ -9,7 +9,7 @@ import time
 import ConfigParser
 
 def read_config():
-	filename = os.path.join(os.path.dirname(sys.argv[0]),'settings.cfg')
+	filename = '/etc/teabreakbot.cfg'
 	if not os.path.exists(filename):
 		return
 	config=ConfigParser.RawConfigParser()

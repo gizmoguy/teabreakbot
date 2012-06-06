@@ -14,7 +14,7 @@ def read_config():
 		return
 	config=ConfigParser.RawConfigParser()
 	config.add_section("twitter")
-	config.set("twitter","enabled",False)
+	config.set("twitter","enabled","false")
 	config.set("twitter","consumer_key","")
 	config.set("twitter","consumer_secret","")
 	config.set("twitter","access_key","")

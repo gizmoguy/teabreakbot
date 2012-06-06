@@ -11,7 +11,7 @@ import ConfigParser
 def read_config():
     filenames = ['/etc/teabreakbot.cfg',
             os.path.expanduser('~/.teabreakbot.cfg'),
-            'settings.cfg']
+            'teabreakbot.cfg']
 
     config=ConfigParser.RawConfigParser()
 

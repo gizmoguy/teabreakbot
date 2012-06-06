@@ -9,9 +9,10 @@ import time
 import ConfigParser
 
 def read_config():
-	filename = '/etc/teabreakbot.cfg'
-	if not os.path.exists(filename):
-		return
+	filenames = ['/etc/teabreakbot.cfg',
+			os.path.expanduser('~/.teabreakbot.cfg'),
+			'settings.cfg']
+
 	config=ConfigParser.RawConfigParser()
 	config.add_section("twitter")
 	config.set("twitter","enabled","false")
@@ -19,7 +20,8 @@ def read_config():
 	config.set("twitter","consumer_secret","")
 	config.set("twitter","access_key","")
 	config.set("twitter","access_secret","")
-	config.read(filename)
+	config.read(filenames)
+
 	return config
 
 class TeabreakBot(irc.IRCClient):

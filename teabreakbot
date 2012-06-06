@@ -14,14 +14,19 @@ def read_config():
 			'settings.cfg']
 
 	config=ConfigParser.RawConfigParser()
+
+	config.add_section("irc")
+	config.set("irc","host","localhost")
+	config.set("irc","port","6667")
+
 	config.add_section("twitter")
 	config.set("twitter","enabled","false")
 	config.set("twitter","consumer_key","")
 	config.set("twitter","consumer_secret","")
 	config.set("twitter","access_key","")
 	config.set("twitter","access_secret","")
-	config.read(filenames)
 
+	config.read(filenames)
 	return config
 
 class TeabreakBot(irc.IRCClient):
@@ -208,8 +213,11 @@ if __name__ == '__main__':
     # create factory protocol and application
     f = TeabreakBotFactory()
 
+    # read in entries from the config file
+    config = read_config()
+
     # connect factory to this host and port
-    reactor.connectTCP("localhost", 6667, f)
+    reactor.connectTCP(config.get("irc","host"), config.getint("irc","port"), f)
 
     # run bot
     reactor.run()

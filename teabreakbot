@@ -125,9 +125,9 @@ class TeabreakBot(irc.IRCClient):
 				self.say(channel, "The last break was a "+self.lastbreaktype+", it happened "+timediffstr+" ago at "+datetime.datetime.fromtimestamp(self.lastbreaktime).strftime('%H:%M'))
 		elif "break" in splitmsg.lower():
 			if "lunch" in splitmsg.lower():
-				breaktype = "Lunchbreak"
+				breaktype = "lunchbreak"
 			else:
-				breaktype = "Teabreak"
+				breaktype = "teabreak"
 			if user in self.ops:
 				print "** "+breaktype.upper()+" DETECTED **",user,"has called a "+breaktype
 				nowbreak = int(time.time())

@@ -130,6 +130,8 @@ class TeabreakBot(irc.IRCClient):
             elif "break" in splitmsg.lower():
                 if "lunch" in splitmsg.lower():
                     breaktype = "lunchbreak"
+                elif "beer" in splitmsg.lower():
+                    breaktype = "beerbreak"
                 else:
                     breaktype = "teabreak"
                 if user in self.ops:

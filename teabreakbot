@@ -117,7 +117,6 @@ class TeabreakBot(irc.IRCClient):
         print user,"PRIVMSG",channel,msg
 
         user = user.split('!', 1)[0]
-        user2 = user.split('^moose', 1)[0]
 
         # is the message at us?
         splitmsg = self.message.match(msg.lower())
@@ -141,8 +140,8 @@ class TeabreakBot(irc.IRCClient):
                         self.lastbreaktype = breaktype
                         if "testbreak" not in splitmsg.lower():
                             if self.config.getboolean('twitter','enabled'):
-                                print "** TWEETING ** "+user2+" has called a "+breaktype+" - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")"
-                                self.api.update_status(user2+" has called a "+breaktype+" - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")")
+                                print "** TWEETING ** "+user+" has called a "+breaktype+" - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")"
+                                self.api.update_status(user+" has called a "+breaktype+" - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")")
                             #self.msg("samo83", "Oi it's teabreak time")
                             #self.msg("samo83_", "Oi it's teabreak time")
                             #self.msg("samo83__", "Oi it's teabreak time")

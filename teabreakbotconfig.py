@@ -29,3 +29,5 @@ if __name__ == "__main__":
     print "Twitter Consumer Secret: %s" % config.get("twitter","consumer_secret")
     print "Twitter Access Key: %s" % config.get("twitter","access_key")
     print "Twitter Access Secret: %s" % config.get("twitter","access_secret")
+
+# vim: set smartindent shiftwidth=4 tabstop=4 softtabstop=4 expandtab :

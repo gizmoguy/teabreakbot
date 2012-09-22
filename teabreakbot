@@ -195,7 +195,7 @@ if __name__ == '__main__':
     f = TeabreakBotFactory()
 
     # read in entries from the config file
-    config = read_config()
+    config = teabreakbotconfig.read_config()
 
     # connect factory to this host and port
     reactor.connectTCP(config.get("irc","host"), config.getint("irc","port"), f)

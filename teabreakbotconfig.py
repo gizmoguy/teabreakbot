@@ -6,7 +6,7 @@ def read_config():
             os.path.expanduser('~/.teabreakbot.cfg'),
             'teabreakbot.cfg']
 
-    config=ConfigParser.RawConfigParser()
+    config=ConfigParser.SafeConfigParser()
 
     config.add_section("irc")
     config.set("irc","host","localhost")

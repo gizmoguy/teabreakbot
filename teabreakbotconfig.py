@@ -22,3 +22,10 @@ def read_config():
     config.read(filenames)
     return config
 
+if __name__ == "__main__":
+    config = read_config()
+    print "Tweet teabreaks: %s" % config.get("twitter","enabled")
+    print "Twitter Consumer Key: %s" % config.get("twitter","consumer_key")
+    print "Twitter Consumer Secret: %s" % config.get("twitter","consumer_secret")
+    print "Twitter Access Key: %s" % config.get("twitter","access_key")
+    print "Twitter Access Secret: %s" % config.get("twitter","access_secret")

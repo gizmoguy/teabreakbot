@@ -3,14 +3,14 @@
 from twisted.words.protocols import irc
 from twisted.internet import reactor, protocol
 
-import sys, os, re
+import sys, os, re, stat
 import datetime
 import time
 
 import teabreakbotconfig
 
 class TeabreakBot(irc.IRCClient):
-    
+
     def __init__(self):
         self.nickname = "teabreakbot"
         self.username = "Teabreaks"
@@ -38,6 +38,11 @@ class TeabreakBot(irc.IRCClient):
             auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
             auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
             self.api = tweepy.API(auth)
+
+        if self.config != None and self.config.getboolean('log','enabled'):
+            self.logpath = os.path.expanduser(self.config.get('log','path'))
+
+        self.teabreaklength = self.config.getint('misc','teabreaklength'))
 
     def __human_time_diff(self, seconds):
         """ Convert seconds into human readable time periods """
@@ -74,7 +79,7 @@ class TeabreakBot(irc.IRCClient):
         if command=="PONG":
             return
         print prefix,command,params
- 
+
     def notice(self, user, channel, msg):
         print user,"NOTICE",channel,msg
 
@@ -117,7 +122,7 @@ class TeabreakBot(irc.IRCClient):
                 if user in self.ops:
                     print "** "+breaktype.upper()+" DETECTED **",user,"has called a "+breaktype
                     nowbreak = int(time.time())
-                    if (nowbreak - self.lastbreaktime) >= 600:
+                    if (nowbreak - self.lastbreaktime) >= self.teabreaklength:
                         self.lastbreaktime = nowbreak
                         self.lastbreaktype = breaktype
                         if "testbreak" not in splitmsg.lower():
@@ -127,10 +132,12 @@ class TeabreakBot(irc.IRCClient):
                             #self.msg("samo83", "Oi it's teabreak time")
                             #self.msg("samo83_", "Oi it's teabreak time")
                             #self.msg("samo83__", "Oi it's teabreak time")
+                            if self.config.getboolean('log','enabled'):
+                                self.log_break(channel, user, splitmsg)
                             self.say(channel, "Enjoy your "+breaktype+"!")
                     else:
-                        print "** "+breaktype.upper()+" DENIED ** Please wait another "+self.__human_time_diff(600 - (nowbreak - self.lastbreaktime))+" before calling a break"
-                        self.say(channel, breaktype+" denied! Please wait another "+self.__human_time_diff(600 - (nowbreak - self.lastbreaktime))+" before calling a break")
+                        print "** "+breaktype.upper()+" DENIED ** Please wait another "+self.__human_time_diff(self.teabreaklength - (nowbreak - self.lastbreaktime))+" before calling a break"
+                        self.say(channel, breaktype+" denied! Please wait another "+self.__human_time_diff(self.teabreaklength - (nowbreak - self.lastbreaktime))+" before calling a break")
                 else:
                     print "** UNAUTHORISED USER",user,"ATTEMPTED TO CALL A "+breaktype.upper()+" **"
                     self.say(channel, breaktype+" denied! You need ops to call a break")
@@ -150,7 +157,7 @@ class TeabreakBot(irc.IRCClient):
             self.ops.append(args)
             self.save_users()
             self.say(channel, "Added %s" % args)
-    
+
     def cmd_userdel(self,user,channel,args):
         args = args.strip(' ')
         if user in self.ops and args in self.ops:
@@ -167,13 +174,27 @@ class TeabreakBot(irc.IRCClient):
 
     def save_users(self):
         try:
-            file = open('ops','w')
-            for user in self.ops:
-                file.write(user + '\n')
-            file.close()
+            with open('ops', 'w') as file:
+                for user in self.ops:
+                    file.write(user + '\n')
         except:
             pass
 
+    def log_break(self,channel,user,msg):
+        line = list()
+        start = datetime.datetime.fromtimestamp(self.lastbreaktime)
+        end = datetime.datetime.fromtimestamp(self.lastbreaktime+self.teabreaklength)
+        line.append(start.strftime("%d/%m/%y|%H:%M:%S"))
+        line.append(end.strftime("%d/%m/%y|%H:%M:%S"))
+        line.append(self.lastbreaktype)
+        line.append(channel)
+        line.append(user)
+        line.append(msg)
+        try:
+            with open(self.logpath, 'w') as file:
+                file.write(' '.join(line) + '\n')
+        except:
+            pass
 
 class TeabreakBotFactory(protocol.ClientFactory):
     # the class of the protocol to build when new connection is made

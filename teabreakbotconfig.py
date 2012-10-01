@@ -19,6 +19,13 @@ def read_config():
     config.set("twitter","access_key","")
     config.set("twitter","access_secret","")
 
+    config.add_section("log")
+    config.set("log", "enabled","false")
+    config.set("log", "path", "~/.teabreakbot.log")
+
+    config.add_section("misc")
+    config.set("misc","teabreaklength","600")
+
     config.read(filenames)
     return config
 
@@ -29,5 +36,7 @@ if __name__ == "__main__":
     print "Twitter Consumer Secret: %s" % config.get("twitter","consumer_secret")
     print "Twitter Access Key: %s" % config.get("twitter","access_key")
     print "Twitter Access Secret: %s" % config.get("twitter","access_secret")
+    if config.getboolean("log","enabled"):
+        print "Logging to: %s" % config.get("log", "path")
 
 # vim: set smartindent shiftwidth=4 tabstop=4 softtabstop=4 expandtab :

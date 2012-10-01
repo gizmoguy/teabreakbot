@@ -11,3 +11,9 @@ CONSUMER_SECRET =
 ACCESS_KEY =
 ACCESS_SECRET =
 
+[log]
+ENABLED = False
+PATH = ~/.teabreakbot.log
+
+[misc]
+TEABREAKLENGTH = 600

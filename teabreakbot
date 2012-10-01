@@ -182,8 +182,10 @@ class TeabreakBot(irc.IRCClient):
 
     def log_break(self,channel,user,msg):
         line = list()
-        date = datetime.datetime.fromtimestamp(self.lastbreaktime)
-        line.append(date.strftime("%d/%m/%y|%H:%M:%S"))
+        start = datetime.datetime.fromtimestamp(self.lastbreaktime)
+        end = datetime.datetime.fromtimestamp(self.lastbreaktime+self.teabreaklength)
+        line.append(start.strftime("%d/%m/%y|%H:%M:%S"))
+        line.append(end.strftime("%d/%m/%y|%H:%M:%S"))
         line.append(self.lastbreaktype)
         line.append(channel)
         line.append(user)

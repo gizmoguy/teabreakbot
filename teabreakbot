@@ -10,7 +10,7 @@ import time
 import teabreakbotconfig
 
 class TeabreakBot(irc.IRCClient):
-    
+
     def __init__(self):
         self.nickname = "teabreakbot"
         self.username = "Teabreaks"
@@ -74,7 +74,7 @@ class TeabreakBot(irc.IRCClient):
         if command=="PONG":
             return
         print prefix,command,params
- 
+
     def notice(self, user, channel, msg):
         print user,"NOTICE",channel,msg
 
@@ -150,7 +150,7 @@ class TeabreakBot(irc.IRCClient):
             self.ops.append(args)
             self.save_users()
             self.say(channel, "Added %s" % args)
-    
+
     def cmd_userdel(self,user,channel,args):
         args = args.strip(' ')
         if user in self.ops and args in self.ops:
@@ -167,10 +167,9 @@ class TeabreakBot(irc.IRCClient):
 
     def save_users(self):
         try:
-            file = open('ops','w')
-            for user in self.ops:
-                file.write(user + '\n')
-            file.close()
+            with open('ops', 'w') as file:
+                for user in self.ops:
+                    file.write(user + '\n')
         except:
             pass
 

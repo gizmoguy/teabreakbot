@@ -3,7 +3,7 @@
 from twisted.words.protocols import irc
 from twisted.internet import reactor, protocol
 
-import sys, os, re
+import sys, os, re, stat
 import datetime
 import time
 
@@ -38,6 +38,9 @@ class TeabreakBot(irc.IRCClient):
             auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
             auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
             self.api = tweepy.API(auth)
+
+        if self.config != None and self.config.getboolean('log','enabled'):
+            self.logpath = os.path.expanduser(self.config.get('log','path'))
 
     def __human_time_diff(self, seconds):
         """ Convert seconds into human readable time periods """
@@ -127,6 +130,8 @@ class TeabreakBot(irc.IRCClient):
                             #self.msg("samo83", "Oi it's teabreak time")
                             #self.msg("samo83_", "Oi it's teabreak time")
                             #self.msg("samo83__", "Oi it's teabreak time")
+                            if self.config.getboolean('log','enabled'):
+                                self.log_break(channel, user, splitmsg)
                             self.say(channel, "Enjoy your "+breaktype+"!")
                     else:
                         print "** "+breaktype.upper()+" DENIED ** Please wait another "+self.__human_time_diff(600 - (nowbreak - self.lastbreaktime))+" before calling a break"
@@ -173,6 +178,19 @@ class TeabreakBot(irc.IRCClient):
         except:
             pass
 
+    def log_break(self,channel,user,msg):
+        line = list()
+        date = datetime.datetime.fromtimestamp(self.lastbreaktime)
+        line.append(date.strftime("%d/%m/%y|%H:%M:%S"))
+        line.append(self.lastbreaktype)
+        line.append(channel)
+        line.append(user)
+        line.append(msg)
+        try:
+            with open(self.logpath, 'w') as file:
+                file.write(' '.join(line) + '\n')
+        except:
+            pass
 
 class TeabreakBotFactory(protocol.ClientFactory):
     # the class of the protocol to build when new connection is made

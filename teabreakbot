@@ -191,7 +191,7 @@ class TeabreakBot(irc.IRCClient):
         line.append(user)
         line.append(msg)
         try:
-            with open(self.logpath, 'w') as file:
+            with open(self.logpath, 'a') as file:
                 file.write(' '.join(line) + '\n')
         except:
             pass

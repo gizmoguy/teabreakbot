@@ -42,7 +42,7 @@ class TeabreakBot(irc.IRCClient):
         if self.config != None and self.config.getboolean('log','enabled'):
             self.logpath = os.path.expanduser(self.config.get('log','path'))
 
-        self.teabreaklength = self.config.getint('misc','teabreaklength'))
+        self.teabreaklength = self.config.getint('misc','teabreaklength')
 
     def __human_time_diff(self, seconds):
         """ Convert seconds into human readable time periods """

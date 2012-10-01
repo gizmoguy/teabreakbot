@@ -23,6 +23,9 @@ def read_config():
     config.set("log", "enabled","false")
     config.set("log", "path", "~/.teabreakbot.log")
 
+    config.add_section("misc")
+    config.set("misc","teabreaklength","600")
+
     config.read(filenames)
     return config
 

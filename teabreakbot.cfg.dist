@@ -3,6 +3,7 @@
 [irc]
 host = localhost
 port = 6667
+chan = #teabreakbot
 
 [twitter]
 ENABLED = False

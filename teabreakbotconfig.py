@@ -11,6 +11,7 @@ def read_config():
     config.add_section("irc")
     config.set("irc","host","localhost")
     config.set("irc","port","6667")
+    config.set("irc","chan","#teabreakbot")
 
     config.add_section("twitter")
     config.set("twitter","enabled","false")

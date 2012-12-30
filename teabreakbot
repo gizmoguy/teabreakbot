@@ -73,7 +73,7 @@ class TeabreakBot(irc.IRCClient):
 
     def signedOn(self):
         """Called when bot has succesfully signed on to server."""
-        self.join("#teabreak")
+        self.join(self.config.get('irc','chan'))
 
     def irc_unknown(self, prefix, command, params):
         if command=="PONG":

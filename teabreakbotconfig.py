@@ -15,6 +15,7 @@ def read_config():
 
     config.add_section("twitter")
     config.set("twitter","enabled","false")
+    config.set("twitter","screen_name","")
     config.set("twitter","consumer_key","")
     config.set("twitter","consumer_secret","")
     config.set("twitter","access_key","")

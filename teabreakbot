@@ -3,6 +3,8 @@
 from twisted.words.protocols import irc
 from twisted.internet import reactor, protocol
 
+import tweepy
+
 import sys, os, re, stat
 import datetime
 import time
@@ -29,7 +31,6 @@ class TeabreakBot(irc.IRCClient):
         reactor.callLater(30,self.ping_pong)
 
         if self.config != None and self.config.getboolean('twitter','enabled'):
-            import tweepy
             """ Setup twitter API """
             CONSUMER_KEY = self.config.get('twitter','consumer_key')
             CONSUMER_SECRET = self.config.get('twitter','consumer_secret')

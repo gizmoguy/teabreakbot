@@ -4,6 +4,7 @@
 host = localhost
 port = 6667
 chan = #teabreakbot
+nick = teabreakbot
 
 [twitter]
 ENABLED = False

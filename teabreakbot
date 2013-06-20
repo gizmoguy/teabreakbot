@@ -79,10 +79,10 @@ class TeabreakBot(irc.IRCClient):
     def irc_unknown(self, prefix, command, params):
         if command=="PONG":
             return
-        print prefix,command,params
+        print(prefix,command,params)
 
     def notice(self, user, channel, msg):
-        print user,"NOTICE",channel,msg
+        print(user,"NOTICE",channel,msg)
 
     def cmd_help(self,user,channel,args):
         self.say(channel," ".join([x[4:]
@@ -100,7 +100,7 @@ class TeabreakBot(irc.IRCClient):
 
     def privmsg(self, user, channel, msg):
         """This will get called when the bot receives a message."""
-        print user,"PRIVMSG",channel,msg
+        print(user,"PRIVMSG",channel,msg)
 
         user = user.split('!', 1)[0]
 
@@ -121,7 +121,7 @@ class TeabreakBot(irc.IRCClient):
                 else:
                     breaktype = "teabreak"
                 if user in self.ops:
-                    print "** "+breaktype.upper()+" DETECTED **",user,"has called a "+breaktype
+                    print("** "+breaktype.upper()+" DETECTED **",user,"has called a "+breaktype)
                     nowbreak = int(time.time())
                     if (nowbreak - self.lastbreaktime) >= self.teabreaklength:
                         self.lastbreaktime = nowbreak
@@ -134,7 +134,7 @@ class TeabreakBot(irc.IRCClient):
                                 if r.status_code == 200:
                                     resp = r.json()
                                     teabreakcount = resp[0]['user']['statuses_count'] + 1
-                                print "** TWEETING ** "+user+" has called a "+breaktype+" - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")"
+                                print("** TWEETING ** "+user+" has called a "+breaktype+" - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")")
                                 self.api.update_status(user+" has called a "+breaktype+" - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")")
                             #self.msg("samo83", "Oi it's teabreak time")
                             #self.msg("samo83_", "Oi it's teabreak time")
@@ -149,10 +149,10 @@ class TeabreakBot(irc.IRCClient):
                             else:
                                 self.say(channel, "Enjoy your "+breaktype+"!")
                     else:
-                        print "** "+breaktype.upper()+" DENIED ** Please wait another "+self.__human_time_diff(self.teabreaklength - (nowbreak - self.lastbreaktime))+" before calling a break"
+                        print("** "+breaktype.upper()+" DENIED ** Please wait another "+self.__human_time_diff(self.teabreaklength - (nowbreak - self.lastbreaktime))+" before calling a break")
                         self.say(channel, breaktype+" denied! Please wait another "+self.__human_time_diff(self.teabreaklength - (nowbreak - self.lastbreaktime))+" before calling a break")
                 else:
-                    print "** UNAUTHORISED USER",user,"ATTEMPTED TO CALL A "+breaktype.upper()+" **"
+                    print("** UNAUTHORISED USER",user,"ATTEMPTED TO CALL A "+breaktype.upper()+" **")
                     self.say(channel, breaktype+" denied! You need ops to call a break")
 
         if channel[0] in ['#','&']:
@@ -160,7 +160,7 @@ class TeabreakBot(irc.IRCClient):
                 self.do_command(user,channel,msg[1:].strip())
 
     def userJoined(self, user, channel):
-        print user,"JOINED",channel
+        print(user,"JOINED",channel)
         if user in self.ops:
             self.cmd_op(user, channel, None)
 
@@ -219,7 +219,7 @@ class TeabreakBotFactory(protocol.ClientFactory):
         connector.connect()
 
     def clientConnectionFailed(self, connector, reason):
-        print "connection failed:", reason
+        print("connection failed:", reason)
         time.sleep(30)
         connector.connect()
 

@@ -133,7 +133,7 @@ class TeabreakBot(irc.IRCClient):
                             if self.config.getboolean('twitter','enabled'):
                                 try:
                                     me = self.api.me()
-                                    teabreakcount = me['statuses_count'] + 1
+                                    teabreakcount = me.statuses_count + 1
                                     print("** TWEETING ** "+user+" has called a "+breaktype+" - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")")
                                     self.api.update_status(user+" has called a "+breaktype+" - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")")
                                 except Exception as e:

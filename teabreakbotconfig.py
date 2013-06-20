@@ -28,6 +28,7 @@ def read_config():
 
     config.add_section("misc")
     config.set("misc","teabreaklength","600")
+    config.set("misc","breaktypes","tea,lunch,beer")
 
     config.read(filenames)
     return config

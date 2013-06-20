@@ -18,6 +18,7 @@ class TeabreakBot(irc.IRCClient):
         self.lastbreaktype = "";
         self.config = teabreakbotconfig.read_config()
         self.nickname = self.config.get('irc','nick')
+        self.breaktypes = self.config.get('misc','breaktypes').split(',')
         self.message = re.compile('^'+self.nickname+'[:,] ?(.*)')
 
         try:
@@ -116,12 +117,11 @@ class TeabreakBot(irc.IRCClient):
                     timediffstr = self.__human_time_diff(currenttime - self.lastbreaktime)
                     self.say(channel, "The last break was a "+self.lastbreaktype+", it happened "+timediffstr+" ago at "+datetime.datetime.fromtimestamp(self.lastbreaktime).strftime('%H:%M'))
             elif "break" in splitmsg.lower():
-                if "lunch" in splitmsg.lower():
-                    breaktype = "lunchbreak"
-                elif "beer" in splitmsg.lower():
-                    breaktype = "beerbreak"
-                else:
-                    breaktype = "teabreak"
+                breaktype = "teabreak"
+                for b in self.breaktypes:
+                    if b in splitmsg.lower():
+                        breaktype = b+"break"
+                        break
                 if user in self.ops:
                     print("** "+breaktype.upper()+" DETECTED **",user,"has called a "+breaktype)
                     nowbreak = int(time.time())

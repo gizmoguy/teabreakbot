@@ -40,6 +40,9 @@ class TeabreakBot(irc.IRCClient):
             auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
             auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
             self.api = tweepy.API(auth)
+            if not api.verify_credentials():
+                print("Failed to verify twitter credentials.")
+                sys.exit(1)
 
         if self.config != None and self.config.getboolean('log','enabled'):
             self.logpath = os.path.expanduser(self.config.get('log','path'))

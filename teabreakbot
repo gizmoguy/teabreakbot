@@ -8,7 +8,6 @@ import tweepy
 import sys, os, re, stat
 import datetime
 import time
-import requests
 
 import teabreakbotconfig
 
@@ -133,16 +132,13 @@ class TeabreakBot(irc.IRCClient):
                         teabreakcount = 0
                         if "testbreak" not in splitmsg.lower():
                             if self.config.getboolean('twitter','enabled'):
-                                count_url = "https://api.twitter.com/1/statuses/user_timeline.json?include_entities=false&include_rts=true&screen_name=%s&count=1" % self.config.get('twitter','screen_name')
-                                r = requests.get(count_url)
-                                if r.status_code == 200:
-                                    resp = r.json()
-                                    teabreakcount = resp[0]['user']['statuses_count'] + 1
-                                print("** TWEETING ** "+user+" has called a "+breaktype+" - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")")
-                                self.api.update_status(user+" has called a "+breaktype+" - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")")
-                            #self.msg("samo83", "Oi it's teabreak time")
-                            #self.msg("samo83_", "Oi it's teabreak time")
-                            #self.msg("samo83__", "Oi it's teabreak time")
+                                try:
+                                    me = self.api.me()
+                                    teabreakcount = me['statuses_count'] + 1
+                                    print("** TWEETING ** "+user+" has called a "+breaktype+" - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")")
+                                    self.api.update_status(user+" has called a "+breaktype+" - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")")
+                                except Exception as e:
+                                    print("Failed to tweet teabreak: %s" % str(e))
                             if self.config.getboolean('log','enabled'):
                                 self.log_break(channel, user, splitmsg)
                             if teabreakcount > 0:

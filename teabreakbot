@@ -15,7 +15,6 @@ class TeabreakBot(irc.IRCClient):
 
     def __init__(self):
         self.nickname = "teabreakbot"
-        self.username = "Teabreaks"
         self.lastbreaktime = 0;
         self.lastbreaktype = "";
         self.message = re.compile('^'+self.nickname+'[:,] ?(.*)')

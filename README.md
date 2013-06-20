@@ -26,5 +26,4 @@ Supported Features Include:
 * Python 2.6 or later
 * Twisted: http://twistedmatrix.com
 * Tweepy: http://tweepy.github.com
-* Requests: http://python-requests.org
 * An IRC server to operate in

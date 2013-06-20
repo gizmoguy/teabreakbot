@@ -17,7 +17,8 @@ class TeabreakBot(irc.IRCClient):
         self.lastbreaktime = 0;
         self.lastbreaktype = "";
         self.config = teabreakbotconfig.read_config()
-        self.message = re.compile('^'+self.config.get('irc','nick')+'[:,] ?(.*)')
+        self.nickname = self.config.get('irc','nick')
+        self.message = re.compile('^'+self.nickname+'[:,] ?(.*)')
 
         try:
             file = open('ops','r')

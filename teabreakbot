@@ -138,6 +138,7 @@ class TeabreakBot(irc.IRCClient):
                                     self.api.update_status(user+" has called a "+breaktype+" - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")")
                                 except Exception as e:
                                     print("Failed to tweet teabreak: %s" % str(e))
+                                    teabreakcount = 0
                             if self.config.getboolean('log','enabled'):
                                 self.log_break(channel, user, splitmsg)
                             if teabreakcount > 0:

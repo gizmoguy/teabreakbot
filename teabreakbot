@@ -134,8 +134,9 @@ class TeabreakBot(irc.IRCClient):
                                 try:
                                     me = self.api.me()
                                     teabreakcount = me.statuses_count + 1
-                                    print("** TWEETING ** "+user+" has called a "+breaktype+" - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")")
-                                    self.api.update_status(user+" has called a "+breaktype+" - "+splitmsg+" ("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")")
+                                    message = self.truncateMessage(user, breaktype, splitmsg)
+                                    print("** TWEETING ** "+message)
+                                    self.api.update_status(message)
                                 except Exception as e:
                                     print("Failed to tweet teabreak: %s" % str(e))
                                     teabreakcount = 0
@@ -158,6 +159,19 @@ class TeabreakBot(irc.IRCClient):
         if channel[0] in ['#','&']:
             if msg.startswith("!") and user in self.ops:
                 self.do_command(user,channel,msg[1:].strip())
+
+    def truncateMessage(self, user, breaktype, msg):
+        MAX_TWEET_LENGTH = 141
+
+        result = [user, "has called a", breaktype, "-", "",
+                  "("+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")+")"]
+        length = 0
+        for s in result:
+            length += len(s) + 1
+        msglen = MAX_TWEET_LENGTH - length
+        result[4] = msg[:msglen]
+
+        return " ".join(result)
 
     def userJoined(self, user, channel):
         print(user,"JOINED",channel)

@@ -116,6 +116,8 @@ class TeabreakBot(irc.IRCClient):
                     currenttime = int(time.time())
                     timediffstr = self.__human_time_diff(currenttime - self.lastbreaktime)
                     self.say(channel, "The last break was a "+self.lastbreaktype+", it happened "+timediffstr+" ago at "+datetime.datetime.fromtimestamp(self.lastbreaktime).strftime('%H:%M'))
+            elif "what" in splitmsg.lower() and "count" in splitmsg.lower():
+                self.say(channel, "There have been %d teabreaks" % self.countTeabreaks())
             elif "break" in splitmsg.lower():
                 breaktype = "teabreak"
                 for b in self.breaktypes:
@@ -132,8 +134,7 @@ class TeabreakBot(irc.IRCClient):
                         if "testbreak" not in splitmsg.lower():
                             if self.config.getboolean('twitter','enabled'):
                                 try:
-                                    me = self.api.me()
-                                    teabreakcount = me.statuses_count + 1
+                                    teabreakcount = self.countTeabreaks() + 1
                                     message = self.truncateMessage(user, breaktype, splitmsg)
                                     print("** TWEETING ** "+message)
                                     self.api.update_status(message)
@@ -172,6 +173,10 @@ class TeabreakBot(irc.IRCClient):
         result[4] = msg[:msglen]
 
         return " ".join(result)
+
+    def countTeabreaks(self):
+        me = self.api.me()
+        return me.statuses_count
 
     def userJoined(self, user, channel):
         print(user,"JOINED",channel)

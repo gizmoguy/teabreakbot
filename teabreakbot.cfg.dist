@@ -14,6 +14,10 @@ CONSUMER_SECRET =
 ACCESS_KEY =
 ACCESS_SECRET =
 
+[yo]
+ENABLED = False
+API_KEY =
+
 [log]
 ENABLED = False
 PATH = ~/.teabreakbot.log

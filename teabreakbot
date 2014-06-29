@@ -3,6 +3,8 @@
 from twisted.words.protocols import irc
 from twisted.internet import reactor, protocol
 
+from yoapi import yo
+
 import tweepy
 
 import sys, os, re, stat
@@ -42,6 +44,10 @@ class TeabreakBot(irc.IRCClient):
             if not self.api.verify_credentials():
                 print("Failed to verify twitter credentials.")
                 sys.exit(1)
+
+        if self.config != None and self.config.getboolean('yo','enabled'):
+            """ Setup Yo API """
+            self.yo = yo.api(self.config.get('yo','api_key'))
 
         if self.config != None and self.config.getboolean('log','enabled'):
             self.logpath = os.path.expanduser(self.config.get('log','path'))
@@ -141,6 +147,8 @@ class TeabreakBot(irc.IRCClient):
                                 except Exception as e:
                                     print("Failed to tweet teabreak: %s" % str(e))
                                     teabreakcount = 0
+                            if self.config.getboolean('yo','enabled'):
+                                self.yo.yoall()
                             if self.config.getboolean('log','enabled'):
                                 self.log_break(channel, user, splitmsg)
                             if teabreakcount > 0:

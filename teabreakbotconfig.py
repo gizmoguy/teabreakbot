@@ -22,6 +22,10 @@ def read_config():
     config.set("twitter","access_key","")
     config.set("twitter","access_secret","")
 
+    config.add_section("yo")
+    config.set("yo","enabled","false")
+    config.set("yo","api_key","")
+
     config.add_section("log")
     config.set("log", "enabled","false")
     config.set("log", "path", "~/.teabreakbot.log")
@@ -40,6 +44,7 @@ if __name__ == "__main__":
     print "Twitter Consumer Secret: %s" % config.get("twitter","consumer_secret")
     print "Twitter Access Key: %s" % config.get("twitter","access_key")
     print "Twitter Access Secret: %s" % config.get("twitter","access_secret")
+    print "YoApp API key: %s" % config.get("yo","api_key")
     if config.getboolean("log","enabled"):
         print "Logging to: %s" % config.get("log", "path")
 

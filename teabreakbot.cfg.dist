@@ -24,4 +24,4 @@ PATH = ~/.teabreakbot.log
 
 [misc]
 TEABREAKLENGTH = 600
-BREAKTYPES = tea,lunch,beer
+BREAKTYPES = tea,lunch,beer,curry

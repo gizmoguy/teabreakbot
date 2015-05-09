@@ -8,6 +8,7 @@ Supported Features Include:
   * teabreaks
   * lunchbreaks
   * beerbreaks
+  * currybreaks
  * Post teabreaks to twitter
  * Cross Platform (Linux tested)
  * Access Controls over the ability to call teabreaks
